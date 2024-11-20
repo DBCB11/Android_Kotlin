@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class StudentAdapter(val students: List<StudentModel>, private val onEditClick: (Int) -> Unit): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
+class StudentAdapter(val students: List<StudentModel>, private val onEditClick: (Int) -> Unit, private val onRemoveClick: (Int) -> Unit): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
 
     class StudentViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val textStudentName: TextView = itemView.findViewById(R.id.text_student_name)
@@ -32,6 +32,9 @@ class StudentAdapter(val students: List<StudentModel>, private val onEditClick: 
 
         holder.imageEdit.setOnClickListener{
             onEditClick(position)
+        }
+        holder.imageRemove.setOnClickListener{
+            onRemoveClick(position)
         }
     }
 }

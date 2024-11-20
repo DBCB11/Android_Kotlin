@@ -13,6 +13,7 @@
     import androidx.core.view.WindowInsetsCompat
     import androidx.recyclerview.widget.LinearLayoutManager
     import androidx.recyclerview.widget.RecyclerView
+    import com.google.android.material.snackbar.Snackbar
 
     class MainActivity : AppCompatActivity() {
         private lateinit var studentAdapter: StudentAdapter
@@ -48,7 +49,7 @@
                 StudentModel("Phạm Thị Tuyết", "SV019"),
                 StudentModel("Lê Văn Vũ", "SV020")
             )
-            studentAdapter = StudentAdapter(students) { position ->
+            studentAdapter = StudentAdapter(students, onEditClick =  { position ->
                 val student = students[position]
 
                 val dialogView = LayoutInflater.from(this).inflate(R.layout.layout_add_new_student_dialog, null)
@@ -58,24 +59,43 @@
                 editHoten.setText(student.studentName)
                 editMssv.setText(student.studentId)
 
-
                 AlertDialog.Builder(this)
                     .setTitle("Cap nhat thong tin sinh vien")
                     .setView(dialogView)
                     .setPositiveButton("OK") { _, _ ->
-                        // Lấy thông tin mới từ EditText
                         val newHoten = editHoten.text.toString()
                         val newMssv = editMssv.text.toString()
 
-                        // Cập nhật danh sách sinh viên
                         students[position] = StudentModel(newHoten, newMssv)
 
-                        // Cập nhật RecyclerView
                         studentAdapter.notifyItemChanged(position)
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
-            }
+            },
+                onRemoveClick = { position ->
+                    val student = students[position]
+                    val deletedStudent = student
+
+                    AlertDialog.Builder(this)
+                        .setTitle("Xac nhan xoa")
+                        .setMessage("Ban co chac chan muon xoa sinh vien ${student.studentName} khong?")
+                        .setPositiveButton("Xoa") { _, _ ->
+                            students.removeAt(position)
+                            studentAdapter.notifyItemRemoved(position)
+                            Snackbar.make(findViewById(R.id.recycler_view_students),
+                                "Da xoa sinh vien ${deletedStudent.studentName}",
+                                Snackbar.LENGTH_LONG)
+                                .setAction("Undo") {
+                                    students.add(position, deletedStudent)
+                                    studentAdapter.notifyItemInserted(position)
+                                }
+                                .show()
+                        }
+                        .setNegativeButton("Huy", null)
+                        .show()
+                }
+            )
 
             findViewById<RecyclerView>(R.id.recycler_view_students).run {
                 adapter = studentAdapter
@@ -103,31 +123,6 @@
                 .show()
             }
 
-
-            val studentItemView = LayoutInflater.from(this).inflate(R.layout.layout_student_item, null)
-            val imageEdit = studentItemView.findViewById<ImageView>(R.id.image_edit)
-
-            imageEdit.setOnClickListener{
-
-                val dialogView = LayoutInflater.from(this)
-                    .inflate(R.layout.layout_add_new_student_dialog, null)
-
-                val editHoten = dialogView.findViewById<EditText>(R.id.edit_hoten)
-                val editMssv = dialogView.findViewById<EditText>(R.id.edit_mssv)
-
-                AlertDialog.Builder(this)
-                    .setTitle("Cap nhap thong tin sinh vien")
-                    .setView(dialogView)
-                    .setPositiveButton("OK", { _, _ ->
-                        val hoten = editHoten.text.toString()
-                        val mssv = editMssv.text.toString()
-                        Log.v("TAG", "$hoten - $mssv")
-                        students.add(StudentModel(hoten, mssv))
-                        studentAdapter.notifyDataSetChanged()
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show()
-            }
 
         }
     }
